@@ -1,117 +1,146 @@
 #include "arvore.h"
-#include <stdio.h>
-#include <stdlib.h>
+#include<stdio.h>
+#include<stdlib.h>
 
+typedef struct arvore{
+  void *info;
+  int chave;
+  struct arvore *dir;
+  struct arvore *esq;
+} arvore;
 
-arvore* criarArvore(void* info) {
+int existeElemento(arvore *a, int chave){
+  
+  if(a == NULL)
+    return 0;
 
-    arvore* novoNo = (arvore*)malloc(sizeof(arvore));
-    novoNo->info = info;
-    novoNo->esq = novoNo->dir = NULL;
-    return novoNo;
+  else if(a->chave == chave)
+    return 1;
+
+  else{
+    int encontrado = existeElemento(a->esq, chave);
+    if(encontrado) return 1;
+    return existeElemento(a->dir, chave);
+  }
 }
 
-arvore* inserirElemento(arvore* no, void* info, int parente, char pos){
-    
-    if (no == NULL){
-        no = criarArvore(info);
-        return no;
+void* buscarElemento(arvore *a, int chave) {
+  if (existeElemento(a, chave)) {
+    if (a->chave == chave)
+      return a->info;
+    else {
+      void* elemento = buscarElemento(a->esq, chave);
+      if (elemento != NULL) return elemento;
+      return buscarElemento(a->dir, chave);
     }
+  }
+  return NULL;
+}
 
-    arvore* noPai = procurarElemento(no, parente);
-
-    if (noPai == NULL){
-        printf("Nó pai não encontrado, não é possível inserir.\n");
-        return no;
-    }
-
-    arvore* novoNo = criarArvore(info);
-
-    if (pos == 'e'){
-        if (noPai->esq != NULL){
-            printf("Posição esquerda já ocupada, não é possível inserir.\n");
-            return no;
-        }
-        noPai->esq = novoNo;
-    } else if (pos == 'd') {
-        if (noPai->dir != NULL){
-            printf("Posição direita já ocupada, não é possível inserir.\n");
-            return no;
-        }
-        noPai->dir = novoNo;
-    } else{
-        printf("Posição inválida, não é possível inserir.\n");
-        return no;
-    }
-
+arvore* encontrarNo(arvore* no, int chave) {
+  if (no == NULL || no->chave == chave) {
     return no;
+  }
+  
+  arvore* noEncontrado = encontrarNo(no->esq, chave);
+  if (noEncontrado != NULL) {
+    return noEncontrado;
+  }
+  
+  return encontrarNo(no->dir, chave);
 }
 
-arvore* procurarElemento(arvore* no, int key){
-
-    if (no == NULL || *(int*)no->info == key)
-        return no;
-
-    if (key < *(int*)no->info)
-        return procurarElemento(no->esq, key);
-
-    return procurarElemento(no->dir, key);
-}
-
-void* encontraElemento(arvore* no, int key){
-
-    arvore* node = procurarElemento(no, key);
-    if (node != NULL){
-        printf("Chave encontrada: %d\n", *(int*)node->info);
-        return node->info;
+arvore* inserirElemento(arvore* arvoreRaiz, void* info, int chave, int chavePai, char posicao) {
+  arvore* novoNo = (arvore*)malloc(sizeof(arvore));
+  novoNo->info = info;
+  novoNo->chave = chave;
+  novoNo->esq = NULL;
+  novoNo->dir = NULL;
+  
+  if (arvoreRaiz == NULL) {
+    return novoNo;
+  }
+  
+  arvore* pai = encontrarNo(arvoreRaiz, chavePai);
+  if (pai == NULL) {
+    printf("No pai nao existe na arvore!\n");
+    return arvoreRaiz;
+  }
+  
+  if (posicao == 'e') {
+    if (pai->esq != NULL) {
+      printf("Ja existe um no nesta posicao! Tente inserir em outra.\n");
+      return arvoreRaiz;
     }
-    printf("Chave não encontrada.\n");
-    return NULL;
+    pai->esq = novoNo;
+  } else if (posicao == 'd') {
+    if (pai->dir != NULL) {
+      printf("Ja existe um no nesta posicao! Tente inserir em outra.\n");
+      return arvoreRaiz;
+    }
+    pai->dir = novoNo;
+  } else {
+    printf("Posicao invalida!\n");
+    return arvoreRaiz;
+  }
+  
+  return arvoreRaiz;
 }
 
-int balanceada(arvore* no){
+int balanceada(arvore* a){
 
-    if (no == NULL)
+    if (a == NULL)
         return 1;
 
-    int alturaEsq = altura(no->esq);
-    int alturaDir = altura(no->dir);
+    int alturaEsq = altura(a->esq);
+    int alturaDir = altura(a->dir);
 
-    if (abs(alturaEsq - alturaDir) <= 1 && balanceada(no->esq) && balanceada(no->dir))
+    if (abs(alturaEsq - alturaDir) <= 1 && balanceada(a->esq) && balanceada(a->dir))
         return 1;
 
     return 0;
 }
 
-int altura(arvore* no){
+int altura(arvore* a){
 
-    if (no == NULL)
+    if (a == NULL)
         return 0;
 
-    int alturaEsq = altura(no->esq);
-    int alturaDir = altura(no->dir);
+    int alturaEsq = altura(a->esq);
+    int alturaDir = altura(a->dir);
 
     return (alturaEsq > alturaDir) ? (alturaEsq + 1) : (alturaDir + 1);
 }
 
-void imprimirArvore(arvore* no){
-
-    if (no == NULL)
-        return;
-
-    printf("%d ", *(int*)no->info);
-
-    imprimirArvore(no->esq);
-    imprimirArvore(no->dir);
+void imprimirNivel(arvore* a, int cont, int nivel){
+  if(a!= NULL){
+    if(cont == nivel)
+      printf("%d ", a->chave);
+    else{
+      imprimirNivel(a->esq, cont+1, nivel);
+      imprimirNivel(a->dir, cont+1, nivel);
+    }
+  }
 }
 
-void freeArvore(arvore* no){
+void imprimirEmLargura(arvore *a){
+  if(a!=NULL){
+    int i;
+    int h = altura(a);
+    for(i = 0; i < h; i++){
+      imprimirNivel(a, 0, i);
+      printf("\n");
+    }
+  }
+}
+
+void freeArvore(arvore* a){
   
-    if (no == NULL)
+    if (a == NULL)
         return;
 
-    freeArvore(no->esq);
-    freeArvore(no->dir);
+    freeArvore(a->esq);
+    freeArvore(a->dir);
 
-    free(no);
+    free(a);
 }

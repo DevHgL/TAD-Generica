@@ -1,29 +1,14 @@
-#ifndef AB_H
+#ifndef _ARVORE_BINARIA_
+#define _ARVORE_BINARIA_
 
-#define AB_H
+typedef struct arvore arvore;
 
-typedef struct arvore{
+arvore* inserirElemento(arvore* arvoreRaiz, void* info, int chave, int chavePai, char posicao);
+int existeElemento(arvore *a, int chave);
+void* buscarElemento(arvore *a, int chave);
+int balanceada(arvore* a);
+int altura(arvore* a);
+void imprimirEmLargura(arvore* a);
+void freeArvore(arvore* a);
 
-  void* info;
-  struct arvore *esq;
-  struct  arvore *dir;
-    
-} arvore;
-
-arvore* criarArvore(void *info);
-
-arvore* inserirElemento(arvore *no, void* info, int parente,char pos);
-
-arvore* procurarElemento(arvore *no, int key);
-
-void* encontraElemento(arvore *no, int key);
-
-int balanceada(arvore *no);
-
-int altura(arvore *no);
-
-void imprimirArvore(arvore *no);
-
-void freeArvore(arvore *no);
-
-#endif  // AB_H
+#endif

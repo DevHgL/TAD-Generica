@@ -1,109 +1,91 @@
 #include "arvore.h"
-#include <stdio.h>
-#include <stdlib.h>
+#include<stdlib.h>
+#include<stdio.h>
+#include<string.h>
 
-void exibirMenu(){
+typedef struct Aluno{
+  int matricula;
+  char nome[50];
+} aluno;
 
-    printf("Escolha uma opcao:\n");
-    printf("1. Inserir elemento\n");
-    printf("2. Verificar se um elemento existe\n");
-    printf("3. Buscar um elemento\n");
-    printf("4. Verificar se a Arvore e balanceada\n");
-    printf("5. Calcular a altura da Arvore\n");
-    printf("6. Imprimir a Arvore em largura\n");
-    printf("0. Sair\n");
-    printf("Opcao: ");
+void menu(){
+  printf("[1] Inserir Elemento\n");
+  printf("[2] Verificar se um elemento existe\n");
+  printf("[3] Buscar um elemento\n");
+  printf("[4] Verificar se a arvore esta balanceada\n");
+  printf("[5] Calcular a altura da arvore\n");
+  printf("[6] Imprimir a arvore em largura\n");
+  printf("[0] Sair do Programa\n");
+  printf("[->] ");
 }
 
 int main(){
 
-    arvore* raiz = NULL;
+  int option = 9;
+  arvore* raiz = NULL;
 
-    int opcao = -1;
-    while (opcao != 0){
+  do{
+    menu();
+    scanf("%d", &option);
 
-        exibirMenu();
-        scanf("%d", &opcao);
+    switch(option){
+      case 1:{
+        int chave, chavePai;
+        char posicao;
+        aluno* aluno1 = (aluno*) malloc(sizeof(aluno));
+        printf("Digite a matricula do aluno: ");
+        scanf("%d", &aluno1->matricula);
+        chave = aluno1->matricula;
+        printf("Digite o nome do aluno: ");
+        scanf("%s", aluno1->nome);
+        printf("Digite a chave do pai do elemento (-1, caso seja o primeiro): ");
+        scanf("%d", &chavePai);
+        printf("Deseja inserir o elemento na esquerda ou na direita? (Digite 'd' para direita e 'e' para esquerda): ");
+        scanf(" %c", &posicao);
+        raiz = inserirElemento(raiz, aluno1, chave, chavePai, posicao);
+        break;
+      }
+      case 2:{
+        int chave;
+        printf("Digite a matricula que deseja verificar: ");
+        scanf("%d", &chave);
+        if(existeElemento(raiz, chave)) printf("Chave %d existe!\n", chave);
+        else printf("Chave %d nao existe!\n", chave);
+        break;
+      }
+      case 3:{
+        int chave;
+        printf("Digite a matricula que deseja buscar: ");
+        scanf("%d", &chave);
 
-        switch (opcao){
-
-            case 1:{
-
-                int* info = (int*)malloc(sizeof(int));
-                int parente;
-                char pos;
-                printf("Digite o valor do elemento a ser inserido: ");
-                scanf("%d", info);
-                printf("Digite o valor do no pai (-1 para o primeiro elemento): ");
-                scanf("%d", &parente);
-                printf("Digite a posicao ('e' para esquerda, 'd'para direita): ");
-                scanf(" %c", &pos);
-
-                raiz = inserirElemento(raiz, info, parente, pos);
-                break;
-            }
-            case 2:{
-
-                int key;
-                printf("Digite a chave do elemento a ser verificado: ");
-                scanf("%d", &key);
-
-                arvore* elemento = procurarElemento(raiz, key);
-                if (elemento != NULL) {
-                    printf("O elemento com chave %d existe na arvore.\n", key);
-                } else {
-                    printf("O elemento com chave %d nao existe na arvore.\n", key);
-                }
-                break;
-            }
-            case 3:{
-
-                int key;
-                printf("Digite a chave do elemento a ser buscado: ");
-                scanf("%d", &key);
-
-                void* elemento = encontraElemento(raiz, key);
-                break;
-            }
-            case 4:{
-
-                if (balanceada(raiz)){
-
-                    printf("A arvore e balanceada.\n");
-                } else {
-                    printf("A arvore nao e balanceada.\n");
-                }
-                break;
-            }
-            case 5:{
-              
-                int alt = altura(raiz);
-                printf("Altura da Arvore: %d\n", alt);
-                break;
-            }
-            case 6:{
-              
-                printf("Arvore em largura: ");
-                imprimirArvore(raiz);
-                printf("\n");
-                break;
-            }
-            case 0:{
-
-                printf("Saindo do programa.\n");
-                break;
-            }
-            default:{
-
-                printf("Opcao invalida. Tente novamente.\n");
-                break;
-            }
-        }
-
-        printf("\n");
+        void *elemento = buscarElemento(raiz, chave);
+        if(elemento != NULL) {
+          aluno *alunoEncontrado = (aluno*)elemento;
+          printf("Informacoes do aluno:\n");
+          printf("Matricula: %d\n", alunoEncontrado->matricula);
+          printf("Nome: %s\n", alunoEncontrado->nome);
+        }  
+        break;
+      }
+      case 4:
+        if(balanceada(raiz)) printf("A arvore esta balanceada!\n");
+        else printf("A arvore nao esta balanceada!\n");
+        break;
+      case 5:
+        printf("Altura da arvore: %d\n", altura(raiz));
+        break;
+      case 6:
+        imprimirEmLargura(raiz);
+        break;
+      case 0:
+        printf("Encerrando programa!\n");
+        freeArvore(raiz);
+        break;
+      default:
+        printf("Opcao invalida!\n");
+        break;
     }
+  }while(option != 0);
 
-    freeArvore(raiz);
-
-    return 0;
+  return 0;
 }
